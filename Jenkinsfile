@@ -2,6 +2,15 @@ pipeline {
     agent any
 
     stages {
+        stage('Clean Docker Environment') {
+            steps {
+                echo 'Cleaning old Docker containers and database files...'
+                sh 'docker rm -f df-api doubtfire-dev-db || true'
+                sh 'docker compose down --remove-orphans || true'
+                sh 'rm -rf ../data/database ../data/tmp ../data/student-work || true'
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building Docker image for Doubtfire API...'
