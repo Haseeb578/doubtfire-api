@@ -2,6 +2,10 @@ require_relative "../config/environment"
 require "minitest/autorun"
 
 class PipelineCrudTest < Minitest::Test
+  def setup
+    ActivityType.where(abbreviation: %w[PTA DUP]).destroy_all
+  end
+
   def test_pipeline_can_create_read_update_and_delete_an_activity_type
     activity = ActivityType.create!(
       name: "Pipeline Test Activity",
@@ -16,5 +20,21 @@ class PipelineCrudTest < Minitest::Test
 
     found.destroy!
     assert_nil ActivityType.find_by(id: activity.id)
+  end
+
+  def test_activity_type_requires_unique_name_and_abbreviation
+    ActivityType.create!(
+      name: "Duplicate Activity",
+      abbreviation: "DUP"
+    )
+
+    duplicate = ActivityType.new(
+      name: "Duplicate Activity",
+      abbreviation: "DUP"
+    )
+
+    refute duplicate.valid?
+    assert duplicate.errors[:name].any?
+    assert duplicate.errors[:abbreviation].any?
   end
 end
